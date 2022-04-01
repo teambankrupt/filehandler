@@ -8,7 +8,7 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "uploaded_files", schema = "cms")
+@Table(name = "uploaded_files", schema = "files")
 class UploadProperties() : BaseEntity() {
 
     @Column(name = "namespace")
