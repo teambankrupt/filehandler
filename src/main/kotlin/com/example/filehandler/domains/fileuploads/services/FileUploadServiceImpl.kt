@@ -5,6 +5,7 @@ import com.example.common.exceptions.notfound.NotFoundException
 import com.example.common.utils.ImageUtils
 import com.example.coreweb.utils.FileIO
 import com.example.filehandler.domains.fileuploads.repositories.FileUploadRepository
+import com.example.filehandler.utils.ImageValidator
 import org.apache.commons.io.FilenameUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -30,13 +31,16 @@ class FileUploadServiceImpl @Autowired constructor(
         height: Int
     ): UploadProperties {
         val ext = FilenameUtils.getExtension(multipartFile.originalFilename)
-        var bytes = multipartFile.bytes
-        if (height > 0) bytes = FileIO.scaleImage(bytes, ext, height)
         println("EXT: $ext")
+
+        var bytes = multipartFile.bytes
+        if (height > 0 && !ImageValidator.isSvgFile(multipartFile)) {
+            bytes = FileIO.scaleImage(bytes, ext, height)
+        }
 
         val uploadProperties = uploadFile(bytes, ext, namespace, uniqueProperty)
 
-        if ("img".equals(ext, ignoreCase = true) || "png".equals(ext, ignoreCase = true)) {
+        if ("jpg".equals(ext, ignoreCase = true) || "png".equals(ext, ignoreCase = true)) {
             if (UploadProperties.NameSpaces.PRODUCTS.value.equals(namespace, ignoreCase = true))
                 applyWatermark(File(uploadProperties.filePath()), waterMarkText)
         }
