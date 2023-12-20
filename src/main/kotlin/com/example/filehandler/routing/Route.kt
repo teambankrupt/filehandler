@@ -10,6 +10,7 @@ class Route {
 
             const val UPLOAD_IMAGE = "$API$VERSION_V2/images"
             const val UPLOAD_IMAGE_BULK = "$API$VERSION_V2/images/bulk"
+            const val MY_FILES = "$API$VERSION_V2/images/my-images"
 
         }
     }

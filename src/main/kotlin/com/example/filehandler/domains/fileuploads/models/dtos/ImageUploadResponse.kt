@@ -1,11 +1,17 @@
 package com.example.filehandler.domains.fileuploads.models.dtos
 
+import com.example.filehandler.domains.fileuploads.models.entities.UploadedImage
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class ImageUploadResponse {
+class ImageUploadResponse(
     @JsonProperty("image_url")
-    lateinit var imageUrl: String
+    var imageUrl: String,
 
     @JsonProperty("thumb_url")
-    lateinit var thumbUrl: String
-}
+    var thumbUrl: String
+)
+
+fun UploadedImage.toResponse(baseUrl: String) = ImageUploadResponse(
+    imageUrl = "$baseUrl/${this.image.fileUrl}",
+    thumbUrl = "$baseUrl/${this.thumb.fileUrl}"
+)
