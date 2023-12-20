@@ -59,7 +59,7 @@ class ImageControllerV2 @Autowired constructor(
         return ResponseEntity.ok(images.map { it.toResponse(this.baseUrlImages) })
     }
 
-    @GetMapping(Route.V1.MY_FILES)
+    @GetMapping(Route.V1.SEARCH_IMAGES)
     fun search(
         @RequestParam("type") fileType: String?,
         @RequestParam("page", defaultValue = "0") page: Int,
@@ -72,6 +72,24 @@ class ImageControllerV2 @Autowired constructor(
             SecurityContext.getLoggedInUsername(),
             fileType,
             PageableParams.of(query, page, size, sortBy, direction)
+        )
+        return ResponseEntity.ok(files.map { it.toDto(this.baseUrlImages) })
+    }
+
+    @GetMapping(Route.V1.SEARCH_IMAGES_ADMIN)
+    fun searchAdmin(
+        @RequestParam("username") username: String?,
+        @RequestParam("type") fileType: String?,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("q", required = false) query: String?,
+        @RequestParam("size", defaultValue = "10") size: Int,
+        @RequestParam("sort_by", defaultValue = "ID") sortBy: SortByFields,
+        @RequestParam("sort_direction", defaultValue = "DESC") direction: Sort.Direction,
+    ): ResponseEntity<Page<ImageDto>> {
+        val files = this.fileService.searchImages(
+            username = username,
+            fileType = fileType,
+            params = PageableParams.of(query, page, size, sortBy, direction)
         )
         return ResponseEntity.ok(files.map { it.toDto(this.baseUrlImages) })
     }
