@@ -12,6 +12,7 @@ class Route {
             const val UPLOAD_IMAGE_BULK = "$API$VERSION_V2/images/bulk"
             const val SEARCH_IMAGES = "$API$VERSION_V2/images"
             const val SEARCH_IMAGES_ADMIN = "$API$VERSION_V2/admin/images"
+            const val DELETE_IMAGE = "$API$VERSION_V2/images/{id}"
 
         }
     }

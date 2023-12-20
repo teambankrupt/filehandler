@@ -4,7 +4,10 @@ import com.example.auth.config.security.SecurityContext
 import com.example.common.exceptions.invalid.ImageInvalidException
 import com.example.coreweb.domains.base.models.enums.SortByFields
 import com.example.coreweb.utils.PageableParams
-import com.example.filehandler.domains.fileuploads.models.dtos.*
+import com.example.filehandler.domains.fileuploads.models.dtos.ImageDto
+import com.example.filehandler.domains.fileuploads.models.dtos.ImageUploadResponse
+import com.example.filehandler.domains.fileuploads.models.dtos.toDto
+import com.example.filehandler.domains.fileuploads.models.dtos.toResponse
 import com.example.filehandler.domains.fileuploads.models.entities.UploadedImage
 import com.example.filehandler.domains.fileuploads.services.FileService
 import com.example.filehandler.domains.fileuploads.services.FileUploadService
@@ -15,13 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.time.Instant
 
 @Api(tags = ["Uploads"], description = "Handle File Uploads including images")
 @RestController
@@ -63,6 +65,8 @@ class ImageControllerV2 @Autowired constructor(
     fun search(
         @RequestParam("type") fileType: String?,
         @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("from_date", required = false) fromDate: Instant?,
+        @RequestParam("to_date", required = false) toDate: Instant?,
         @RequestParam("q", required = false) query: String?,
         @RequestParam("size", defaultValue = "10") size: Int,
         @RequestParam("sort_by", defaultValue = "ID") sortBy: SortByFields,
@@ -71,6 +75,8 @@ class ImageControllerV2 @Autowired constructor(
         val files = this.fileService.searchImages(
             SecurityContext.getLoggedInUsername(),
             fileType,
+            fromDate = fromDate ?: Instant.EPOCH,
+            toDate = toDate ?: Instant.now(),
             PageableParams.of(query, page, size, sortBy, direction)
         )
         return ResponseEntity.ok(files.map { it.toDto(this.baseUrlImages) })
@@ -80,18 +86,30 @@ class ImageControllerV2 @Autowired constructor(
     fun searchAdmin(
         @RequestParam("username") username: String?,
         @RequestParam("type") fileType: String?,
-        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("from_date", required = false) fromDate: Instant?,
+        @RequestParam("to_date", required = false) toDate: Instant?,
         @RequestParam("q", required = false) query: String?,
+        @RequestParam("page", defaultValue = "0") page: Int,
         @RequestParam("size", defaultValue = "10") size: Int,
         @RequestParam("sort_by", defaultValue = "ID") sortBy: SortByFields,
         @RequestParam("sort_direction", defaultValue = "DESC") direction: Sort.Direction,
     ): ResponseEntity<Page<ImageDto>> {
+
         val files = this.fileService.searchImages(
             username = username,
             fileType = fileType,
+            fromDate = fromDate ?: Instant.EPOCH,
+            toDate = toDate ?: Instant.now(),
             params = PageableParams.of(query, page, size, sortBy, direction)
         )
         return ResponseEntity.ok(files.map { it.toDto(this.baseUrlImages) })
+    }
+
+    @DeleteMapping(Route.V1.DELETE_IMAGE)
+    fun delete(@PathVariable("id") id: Long):
+            ResponseEntity<HttpStatus> {
+        this.fileService.delete(id, true)
+        return ResponseEntity.ok().build()
     }
 
     private fun upload(file: MultipartFile, namespace: String, username: String): UploadedImage {
