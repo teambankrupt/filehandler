@@ -29,6 +29,6 @@ fun UploadedImage.toDto(baseUrl: String) = ImageDto(
     createdAt = this.createdAt,
     updatedAt = this.updatedAt,
     createdBy = this.createdBy,
-    imageUrl = "$baseUrl/${this.image.fileUrl}",
-    thumbUrl = "$baseUrl/${this.thumb.fileUrl}"
+    imageUrl = "$baseUrl${this.image.fileUrl}",
+    thumbUrl = "$baseUrl${this.thumb.fileUrl}"
 )
